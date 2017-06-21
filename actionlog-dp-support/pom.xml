@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>actionlog</artifactId>
+        <groupId>com.dianping.actionlog</groupId>
+        <version>1.0.0</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>actionlog-dp-support</artifactId>
+    <version>${project-dp-support-version}</version>
+    <packaging>jar</packaging>
+
+    <dependencies>
+        <!-- 自身依赖 Begin -->
+        <dependency>
+            <groupId>com.dianping.actionlog</groupId>
+            <artifactId>actionlog-core</artifactId>
+        </dependency>
+        <!-- DP依赖 Begin -->
+        <dependency>
+            <groupId>com.dianping.dpsf</groupId>
+            <artifactId>dpsf-net</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.dianping.cat</groupId>
+            <artifactId>cat-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.dianping.cat</groupId>
+            <artifactId>cat-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.dianping.lion</groupId>
+            <artifactId>lion-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.meituan.inf</groupId>
+            <artifactId>xmd-log4j2</artifactId>
+        </dependency>
+    </dependencies>
+</project>

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>actionlog</artifactId>
+        <groupId>com.dianping.actionlog</groupId>
+        <version>1.0.0</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>actionlog-log4j-impl-lion</artifactId>
+    <version>${project-log4j-impl-lion-version}</version>
+    <packaging>jar</packaging>
+
+    <dependencies>
+        <!-- 自身依赖 Begin -->
+        <dependency>
+            <groupId>com.dianping.actionlog</groupId>
+            <artifactId>actionlog-log4j-impl</artifactId>
+            <version>${project-log4j-impl-version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.dianping.actionlog</groupId>
+            <artifactId>actionlog-dp-support</artifactId>
+            <version>${project-dp-support-version}</version>
+        </dependency>
+        <!-- DP依赖 Begin -->
+        <dependency>
+            <groupId>com.dianping.lion</groupId>
+            <artifactId>lion-client</artifactId>
+        </dependency>
+    </dependencies>
+</project>
