@@ -3,14 +3,11 @@ package com.dianping.actionlog.context;
 import com.dianping.actionlog.advice.ActionLogBean;
 import com.dianping.actionlog.advice.LogInfo;
 import com.dianping.actionlog.api.ActionLogKey;
-import com.dianping.actionlog.api.HandleType;
 import com.dianping.actionlog.common.ActionLogConfig;
 import com.dianping.actionlog.logger.ActionLogger;
 import com.dianping.actionlog.logger.ActionLoggerBuilder;
+import com.dianping.actionlog.logger.CacheActionLoggerFactory;
 import com.dianping.actionlog.logger.impl.NOPActionLogger;
-import com.google.common.base.MoreObjects;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -21,8 +18,6 @@ import java.util.Map;
  * @author jourrey
  */
 public class LogContext {
-    private static final Logger LOG = LoggerFactory.getLogger(LogContext.class);
-
     private static volatile LogContext instance = null;
     private ThreadLocal<Map<String, Object>> localContext = new ThreadLocal<Map<String, Object>>() {
         @Override
@@ -61,63 +56,51 @@ public class LogContext {
         return ACTION_LOG_BEAN.get().clear();
     }
 
+    /**
+     * 添加一个上下文本地缓存
+     *
+     * @param key
+     * @param value
+     */
     public void putLocalContext(String key, Object value) {
         localContext.get().put(key, value);
     }
 
+    /**
+     * 获取一个上下文本地缓存
+     *
+     * @param key
+     * @return
+     */
     public Object getLocalContext(String key) {
         return localContext.get().get(key);
     }
 
+    /**
+     * 清空本地上下文缓存
+     */
     public void clearLocalContext() {
         localContext.get().clear();
         localContext.remove();
     }
 
     /**
-     * 获取项目名
-     *
-     * @return
-     */
-    public String getAppName() {
-        return ActionLogConfig.getAppName();
-    }
-
-    /**
-     * 如果actionLogKey为null,则提供默认{@link DefaultActionLogKey#DEFAULT}
-     *
-     * @param actionLogKey 日志标记
-     * @return
-     */
-    public ActionLogKey ifNullOfferDefault(ActionLogKey actionLogKey) {
-        return MoreObjects.firstNonNull(actionLogKey, DefaultActionLogKey.DEFAULT);
-    }
-
-    /**
-     * 如果handleType为null,则提供默认{@link HandleType#PARAM}
-     *
-     * @param handleType 日志类型
-     * @return
-     */
-    public HandleType ifNullOfferDefault(HandleType handleType) {
-        return MoreObjects.firstNonNull(handleType, HandleType.PARAM);
-    }
-
-    /**
      * 根据actionLogKey获取ActionLogger
      * 如果actionLogKey为null,则提供默认{@link DefaultActionLogKey#DEFAULT}
+     * 这里没有缓存机制,由各自ActionLoggerFactory实现{@link CacheActionLoggerFactory},目的是方便自定义热加载策略
+     * 不能使用SLF4J-API,否则获取Logger过程中,会引起循环
      *
      * @param actionLogKey the actionLogKey of the Logger to return
      */
     public ActionLogger getActionLogger(ActionLogKey actionLogKey) {
         ActionLogger actionLogger;
         try {
-            actionLogKey = ifNullOfferDefault(actionLogKey);
+            actionLogKey = ActionLogConfig.ifNullOfferDefault(actionLogKey);
             actionLogger = ActionLoggerBuilder.getLogger(actionLogKey);
         } catch (Exception e) {
-            LOG.error("getActionLogger Exception", e);
             actionLogger = NOPActionLogger.NOP_ACTION_LOGGER;
         }
+        actionLogger = actionLogger == null ? NOPActionLogger.NOP_ACTION_LOGGER : actionLogger;
         return actionLogger;
     }
 

@@ -2,7 +2,6 @@ package com.dianping.actionlog.logger.binder;
 
 import com.dianping.actionlog.logger.ActionLoggerBuilder;
 import com.dianping.actionlog.logger.ActionLoggerFactory;
-import org.slf4j.ILoggerFactory;
 
 /**
  * An internal interface which helps the static {@link ActionLoggerBuilder}
@@ -16,7 +15,7 @@ public interface ActionLoggerFactoryBinder {
      * Return the instance of {@link ActionLoggerFactory} that
      * {@link com.dianping.actionlog.logger.ActionLoggerBuilder} class should bind to.
      *
-     * @return the instance of {@link ILoggerFactory} that
+     * @return the instance of {@link ActionLoggerFactory} that
      * {@link com.dianping.actionlog.logger.ActionLoggerBuilder} class should bind to.
      */
     ActionLoggerFactory getActionLoggerFactory();

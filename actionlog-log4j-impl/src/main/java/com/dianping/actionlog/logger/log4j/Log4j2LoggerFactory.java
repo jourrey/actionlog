@@ -1,8 +1,8 @@
 package com.dianping.actionlog.logger.log4j;
 
 import com.dianping.actionlog.api.ActionLogKey;
+import com.dianping.actionlog.common.ActionLogConfig;
 import com.dianping.actionlog.common.LogLevel;
-import com.dianping.actionlog.context.LogContext;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Level;
@@ -25,8 +25,6 @@ import org.apache.logging.log4j.core.config.LoggerConfig;
 import org.apache.logging.log4j.core.filter.CompositeFilter;
 import org.apache.logging.log4j.core.filter.ThresholdFilter;
 import org.apache.logging.log4j.core.layout.PatternLayout;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.nio.charset.Charset;
@@ -37,7 +35,6 @@ import java.util.List;
  * Created by jourrey on 16/11/21.
  */
 public class Log4j2LoggerFactory {
-    private static final Logger LOG = LoggerFactory.getLogger(Log4j2LoggerFactory.class);
 
     private static final String FILE_SEPARATOR = File.separator;
     private static final String NAME_SEPARATOR = "_";
@@ -47,7 +44,7 @@ public class Log4j2LoggerFactory {
     private static final boolean IS_CURRENT_CONTEXT = false;
 
     private static final String FILE_SUFFIX = "";
-    // 由于log4j2的RollingRandomAccessFileAppender时间戳策略问题,最后一个时间单位并不是当前的,所以只保证小时准确性
+    // 由于log4j2的RollingRandomAccessFileAppender时间戳策略问题,最后一个时间单位并不是当前的,所以只保证日期准确性
     private static final String ROLLING_FILE_SUFFIX = "_%d{yyyyMMdd_HH}_%i.gz";
 
     private static final int APPENDER_BUFFER_SIZE = 256 * 1024;
@@ -61,29 +58,16 @@ public class Log4j2LoggerFactory {
     /*日志节点,文件名*/
     private String action;
 
-    private Log4j2LoggerFactory(String loggerName, ActionLogKey actionLogKey) {
-        this.loggerName = loggerName;
-        this.flow = actionLogKey.flow();
-        this.action = actionLogKey.action();
-    }
-
     /**
      * 创建日志构造器
      *
-     * @param actionLogKey 日志key
-     * @return
+     * @param loggerName
+     * @param actionLogKey
      */
-    public static synchronized Log4j2LoggerFactory create(ActionLogKey actionLogKey) {
-        Log4j2LoggerFactory factory = null;
-        try {
-            actionLogKey = LogContext.getInstance().ifNullOfferDefault(actionLogKey);
-            /*这里loggerName直接使用"+"拼接字符串,是因为flow和action相对稳定,运行一次后会加入常量池,提升性能
-            实际测试"+"QPS达到40W,MessageFormat.format在11W,String.format只有3-4W*/
-            factory = new Log4j2LoggerFactory(actionLogKey.flow() + NAME_SEPARATOR + actionLogKey.action(), actionLogKey);
-        } catch (Exception e) {
-            LOG.error("create Exception", e);
-        }
-        return factory;
+    public Log4j2LoggerFactory(String loggerName, ActionLogKey actionLogKey) {
+        this.loggerName = loggerName;
+        this.flow = actionLogKey.flow();
+        this.action = actionLogKey.action();
     }
 
     /**
@@ -91,10 +75,10 @@ public class Log4j2LoggerFactory {
      *
      * @return
      */
-    public Logger createLogger() {
+    public org.apache.logging.log4j.Logger createLogger() {
         destroy();
         register();
-        return LoggerFactory.getLogger(loggerName);
+        return LogManager.getLogger(loggerName);
     }
 
     private void register() {
@@ -148,11 +132,13 @@ public class Log4j2LoggerFactory {
         ctx.updateLoggers();
     }
 
+    /**
+     * 根据ActionLog的日志级别返回对应的Log4j2的日志级别
+     *
+     * @return
+     */
     private Level loggerConfigLevel() {
-        return transformLevel(Log4j2LoggerConfig.getLoggerLogLevel());
-    }
-
-    private Level transformLevel(LogLevel level) {
+        LogLevel level = ActionLogConfig.getLogLevel();
         if (LogLevel.DEBUG.equals(level)) {
             return Level.DEBUG;
         }
@@ -176,9 +162,19 @@ public class Log4j2LoggerFactory {
      */
     private List<Appender> getAppender(Configuration config) {
         List<Appender> appenderList = Lists.newArrayList();
-        appenderList.add(getAppender(config, Level.INFO));
-        appenderList.add(getAppender(config, Level.WARN));
-        appenderList.add(getAppender(config, Level.ERROR));
+        Level level = loggerConfigLevel();
+        if (Level.DEBUG.isMoreSpecificThan(level)) {
+            appenderList.add(getAppender(config, Level.DEBUG));
+        }
+        if (Level.INFO.isMoreSpecificThan(level)) {
+            appenderList.add(getAppender(config, Level.INFO));
+        }
+        if (Level.WARN.isMoreSpecificThan(level)) {
+            appenderList.add(getAppender(config, Level.WARN));
+        }
+        if (Level.ERROR.isMoreSpecificThan(level)) {
+            appenderList.add(getAppender(config, Level.ERROR));
+        }
         return appenderList;
     }
 
@@ -200,7 +196,7 @@ public class Log4j2LoggerFactory {
         TriggeringPolicy tp = CompositeTriggeringPolicy.createPolicy(ttp, stp);
         RolloverStrategy strategy = DefaultRolloverStrategy.createStrategy(Log4j2LoggerConfig.getLogFileMaxNum()
                 , null, null, null, config);
-        //日志打印Appender,RollingRandomAccessFileAppender相比RollingFileAppender有很大的性能提升,官网宣称是20-200%。
+        //日志打印Appender,RollingRandomAccessFileAppender相比RollingFileAppender有很大的性能提升,官方宣称是20-200%。
         Appender appender = RollingRandomAccessFileAppender.createAppender(getFileName(level), getFilePattern(level)
                 , APPENDER_IS_APPEND, getAppenderName(level), Log4j2LoggerConfig.getLogAppenderImmediateFlush()
                 , String.valueOf(APPENDER_BUFFER_SIZE), tp, strategy, layout, getAppenderFilter(level)
@@ -216,8 +212,9 @@ public class Log4j2LoggerFactory {
      */
     private String getFileName(Level level) {
         StringBuilder fileName = new StringBuilder();
-        fileName.append(Log4j2LoggerConfig.getLogHomePath()).append(FILE_SEPARATOR)
-                .append(LogContext.getInstance().getAppName());
+        fileName.append(Log4j2LoggerConfig.getLogHomePath())
+                .append(FILE_SEPARATOR)
+                .append(ActionLogConfig.getAppName());
         if (StringUtils.isNotBlank(flow)) {
             fileName.append(FILE_SEPARATOR).append(flow);
         }
@@ -237,8 +234,9 @@ public class Log4j2LoggerFactory {
      */
     private String getFilePattern(Level level) {
         StringBuilder filePattern = new StringBuilder();
-        filePattern.append(Log4j2LoggerConfig.getLogHomePath()).append(FILE_SEPARATOR)
-                .append(LogContext.getInstance().getAppName());
+        filePattern.append(Log4j2LoggerConfig.getLogHomePath())
+                .append(FILE_SEPARATOR)
+                .append(ActionLogConfig.getAppName());
         if (StringUtils.isNotBlank(flow)) {
             filePattern.append(FILE_SEPARATOR).append(flow);
         }
@@ -267,6 +265,9 @@ public class Log4j2LoggerFactory {
      * @return
      */
     private Filter getAppenderFilter(Level level) {
+        if (Level.DEBUG.equals(level)) {
+            return LevelAppenderFilter.DEBUG.filter;
+        }
         if (Level.INFO.equals(level)) {
             return LevelAppenderFilter.INFO.filter;
         }
@@ -284,6 +285,11 @@ public class Log4j2LoggerFactory {
      * ERROR 级别以上均为严重错误,视同 ERROR 一起打印,防止丢失重要异常信息
      */
     public enum LevelAppenderFilter {
+
+        DEBUG(CompositeFilter.createFilters(new Filter[]{
+                ThresholdFilter.createFilter(Level.INFO, Filter.Result.DENY, Filter.Result.NEUTRAL),
+                ThresholdFilter.createFilter(Level.DEBUG, Filter.Result.ACCEPT, Filter.Result.DENY)
+        })),
 
         INFO(CompositeFilter.createFilters(new Filter[]{
                 ThresholdFilter.createFilter(Level.WARN, Filter.Result.DENY, Filter.Result.NEUTRAL),
@@ -307,9 +313,10 @@ public class Log4j2LoggerFactory {
     }
 
     public static void main(String[] args) {
+        ActionLogConfig.setLogLevel(LogLevel.OFF);
         for (int i = 0; i < 5; i++) {
             final int finalI = i;
-            Logger logger = new Log4j2LoggerFactory(i + NAME_SEPARATOR + i, new ActionLogKey() {
+            org.apache.logging.log4j.Logger logger = new Log4j2LoggerFactory(i + NAME_SEPARATOR + i, new ActionLogKey() {
                 @Override
                 public String flow() {
                     return "" + finalI;

@@ -15,7 +15,7 @@ public interface ActionLogConstants {
     String SLF4J_PLACEHOLDER = ": {}";
 
     // 入口ID和IP
-    String LOG_REQUEST_ID = "LOG_REQUEST_ID";
-    String LOG_REQUEST_IP = "LOG_REQUEST_IP";
+    String LOG_REQUEST_ID = "ACTION_LOG_REQUEST_ID";
+    String LOG_REQUEST_IP = "ACTION_LOG_REQUEST_IP";
 
 }

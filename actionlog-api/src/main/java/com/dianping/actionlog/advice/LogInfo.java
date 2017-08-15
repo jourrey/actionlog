@@ -1,5 +1,6 @@
 package com.dianping.actionlog.advice;
 
+import com.dianping.actionlog.advice.filter.LogFilter;
 import com.dianping.actionlog.api.HandleType;
 import com.dianping.actionlog.common.LogType;
 
@@ -164,7 +165,8 @@ public class LogInfo implements Serializable {
     }
 
     /**
-     * 清空上下文,Filter内不要调用
+     * 清空上下文
+     * 内部使用,{@link LogFilter}实现内不要调用,否则后续操作可能空指针
      *
      * @return
      */

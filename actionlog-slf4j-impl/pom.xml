@@ -3,14 +3,14 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <groupId>com.dianping.actionlog</groupId>
         <artifactId>actionlog</artifactId>
+        <groupId>com.dianping.actionlog</groupId>
         <version>1.0.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>actionlog-log4j-slf4j-impl</artifactId>
-    <version>${project-log4j-slf4j-impl-version}</version>
+    <artifactId>actionlog-slf4j-impl</artifactId>
+    <version>${project-slf4j-impl-version}</version>
     <packaging>jar</packaging>
 
     <dependencies>
@@ -29,23 +29,14 @@
             <artifactId>slf4j-ext</artifactId>
         </dependency>
         <!-- jcl与slf4j桥接jar包 -->
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>jcl-over-slf4j</artifactId>
-        </dependency>
-        <!-- log4j2与slf4j绑定jar包,actionlog为了兼容slf4j,内部已经copy了一份,静态绑定会报错,打包请注释掉 -->
         <!--<dependency>-->
-        <!--<groupId>org.apache.logging.context</groupId>-->
-        <!--<artifactId>context-slf4j-impl</artifactId>-->
+        <!--<groupId>org.slf4j</groupId>-->
+        <!--<artifactId>jcl-over-slf4j</artifactId>-->
         <!--</dependency>-->
-        <!-- log4j2核心jar包 -->
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-core</artifactId>
-        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>org.slf4j</groupId>-->
+            <!--<artifactId>slf4j-log4j12</artifactId>-->
+            <!--<version>1.7.25</version>-->
+        <!--</dependency>-->
     </dependencies>
 </project>

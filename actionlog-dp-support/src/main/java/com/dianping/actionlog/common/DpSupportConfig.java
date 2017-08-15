@@ -1,6 +1,5 @@
 package com.dianping.actionlog.common;
 
-import com.dianping.actionlog.context.LogContext;
 import com.dianping.lion.client.Lion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,7 +12,7 @@ public class DpSupportConfig {
 
     public static String lionKey(String key) {
         try {
-            return LogContext.getInstance().getAppName() + key;
+            return ActionLogConfig.getAppName() + key;
         } catch (Throwable th) {
             LOG.error("lionKey Exception", th);
             return "";

@@ -1,13 +1,12 @@
 package com.dianping.actionlog.aspect.pigeon;
 
 import com.alibaba.fastjson.JSON;
-import com.dianping.actionlog.advice.LogInfo;
 import com.dianping.actionlog.advice.LogManual;
-import com.dianping.actionlog.api.ActionLogKey;
 import com.dianping.actionlog.api.HandleType;
 import com.dianping.actionlog.common.ActionLogConstants;
 import com.dianping.actionlog.common.DpSupportConfig;
 import com.dianping.actionlog.common.DpSupportConstants;
+import com.dianping.actionlog.common.LogType;
 import com.dianping.actionlog.common.PigeonActionLogKey;
 import com.dianping.actionlog.common.PigeonLogType;
 import com.dianping.actionlog.context.LogContext;
@@ -43,14 +42,14 @@ public class ActionLogProviderInterceptor implements ProviderInterceptor {
         LogContext.getInstance().putLocalContext(ActionLogConstants.LOG_REQUEST_IP, actionLogRequestIp);
 
         if (DpSupportConfig.needPigeonLog()) {
-            PigeonServiceLogManual.info(HandleType.PARAM, getExtendInfo(), providerContext);
+            PigeonServiceLogManual.info(PigeonActionLogKey.PIGEON_SERVICE, HandleType.PARAM, getExtendInfo(), providerContext);
         }
     }
 
     @Override
     public void postInvoke(ProviderContext providerContext) {
         if (DpSupportConfig.needPigeonLog()) {
-            PigeonServiceLogManual.info(HandleType.RETURN, getExtendInfo(), providerContext);
+            PigeonServiceLogManual.info(PigeonActionLogKey.PIGEON_SERVICE, HandleType.RETURN, getExtendInfo(), providerContext);
         }
 
         LogContext.getInstance().clearLocalContext();
@@ -69,25 +68,8 @@ public class ActionLogProviderInterceptor implements ProviderInterceptor {
 
     private static class PigeonServiceLogManual extends LogManual {
 
-        /**
-         * 打印info级别日志
-         *
-         * @param handleType 操作类型
-         * @param message    日志信息
-         * @param params     打印参数
-         */
-        public static void info(HandleType handleType, String message, Object... params) {
-            try {
-                ActionLogKey actionLogKey = PigeonActionLogKey.PIGEON_SERVICE;
-                handleType = LogContext.getInstance().ifNullOfferDefault(handleType);
-                LogInfo logInfo = logInfoFilter(PigeonLogType.PIGEON_SERVICE, actionLogKey, handleType, message, params);
-                if (logInfo == null) {
-                    return;
-                }
-                LogContext.getInstance().getActionLogger(actionLogKey).info(message, params);
-            } catch (Exception e) {
-                LOG.error("PigeonServiceLogManual Exception", e);
-            }
+        protected LogType getLogType() {
+            return PigeonLogType.PIGEON_SERVICE;
         }
 
     }

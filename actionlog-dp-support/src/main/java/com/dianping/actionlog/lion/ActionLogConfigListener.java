@@ -7,6 +7,8 @@ import com.dianping.actionlog.util.AppInfoUtils;
 import com.dianping.lion.client.ConfigEvent;
 import com.dianping.lion.client.ConfigListener;
 import com.dianping.lion.client.Lion;
+import com.dianping.lion.client.spring.LionConfigListener;
+import com.google.common.base.MoreObjects;
 
 /**
  * @author jourrey.liu
@@ -14,6 +16,7 @@ import com.dianping.lion.client.Lion;
  * @Description: 刷新 {@link ActionLogConfig}
  * @date 2016-11-16 下午3:13:17
  */
+@LionConfigListener
 public class ActionLogConfigListener implements ConfigListener {
 
     static {
@@ -28,10 +31,10 @@ public class ActionLogConfigListener implements ConfigListener {
     }
 
     private static void flushActionLogConfig() {
-        ActionLogConfig.setAppName(AppInfoUtils.getAppName());
-        ActionLogConfig.setNeedFilterLog(Lion.getBoolean(DpSupportConfig.lionKey(LionKeys.FILTER_LOG_SWITCH_KEY)));
+        ActionLogConfig.setAppName(MoreObjects.firstNonNull(AppInfoUtils.getAppName(), ActionLogConfig.getAppName()));
+        ActionLogConfig.setNeedFilterLog(MoreObjects.firstNonNull(Lion.getBoolean(DpSupportConfig.lionKey(LionKeys.FILTER_LOG_SWITCH_KEY)), ActionLogConfig.isNeedFilterLog()));
         // LogManual配置
-        ActionLogConfig.setLogManualIncludeLocation(Lion.getBoolean(DpSupportConfig.lionKey(LionKeys.LOG_MANUAL_INCLUDE_LOCATION)));
+        ActionLogConfig.setLogManualIncludeLocation(MoreObjects.firstNonNull(Lion.getBoolean(DpSupportConfig.lionKey(LionKeys.LOG_MANUAL_INCLUDE_LOCATION)), ActionLogConfig.isLogManualIncludeLocation()));
     }
 
 }

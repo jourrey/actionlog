@@ -16,7 +16,7 @@
  */
 package org.slf4j.impl;
 
-import org.apache.logging.slf4j.Log4jLoggerFactory;
+import com.dianping.actionlog.slf4j.ActionLogLoggerFactory;
 import org.slf4j.ILoggerFactory;
 import org.slf4j.spi.LoggerFactoryBinder;
 
@@ -26,14 +26,7 @@ import org.slf4j.spi.LoggerFactoryBinder;
  */
 public final class StaticLoggerBinder implements LoggerFactoryBinder {
 
-    /**
-     * Declare the version of the SLF4J API this implementation is compiled
-     * against. The value of this field is usually modified with each release.
-     */
-    // to avoid constant folding by the compiler, this field must *not* be final
-    public static String REQUESTED_API_VERSION = "1.6"; // !final
-
-    private static final String LOGGER_FACTORY_CLASS_STR = Log4jLoggerFactory.class.getName();
+    private static final String LOGGER_FACTORY_CLASS_STR = ActionLogLoggerFactory.class.getName();
 
     /**
      * The unique instance of this class.
@@ -50,7 +43,7 @@ public final class StaticLoggerBinder implements LoggerFactoryBinder {
      * Private constructor to prevent instantiation
      */
     private StaticLoggerBinder() {
-        loggerFactory = new Log4jLoggerFactory();
+        loggerFactory = new ActionLogLoggerFactory();
     }
 
     /**

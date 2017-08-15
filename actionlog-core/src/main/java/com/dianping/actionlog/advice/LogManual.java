@@ -12,238 +12,196 @@ import com.dianping.shadow.context.AspectContext;
 import com.dianping.shadow.util.ClassUtils;
 import com.dianping.shadow.util.ReflectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import static com.google.common.base.Preconditions.checkArgument;
-
 /**
  * Created by jourrey on 16/11/23.
  * ActionLog手动打印日志类,保持了与注解切面同一上下文
- * 使用ActionLogKey,而不是String flow,String action,目的是,期望这些业务流是固定的,且配置在一个地方
- * 另外一点是,传一个参数总比两个容易,减少错误的可能性
+ * 使用ActionLogKey,而不是String flow,String action,目的是扩展性好.
+ * 另外一点是,传一个参数总比两个容易,减少错误的可能性.且期望这些业务流是固定的,且配置在一个地方
  */
 public class LogManual {
-    private static final Logger LOG = LoggerFactory.getLogger(LogManual.class);
+    private final static LogManual LOG_MANUAL = new LogManual();
 
     /**
      * 打印debug级别日志
+     * 只调用过滤器和获取Logger打印.因为支持SLF4J-API,逻辑太多容易死循环,保证这个过程不使用SLF4J-API
      *
      * @param actionLogKey 日志标记
      * @param handleType   操作类型
      * @param message      日志信息
      * @param params       打印参数
      */
-    public static boolean debug(ActionLogKey actionLogKey, HandleType handleType, String message, Object... params) {
+    public final static void debug(ActionLogKey actionLogKey, HandleType handleType, String message, Object... params) {
         try {
-            actionLogKey = ifNullOfferDefault(actionLogKey);
-            handleType = ifNullOfferDefault(handleType);
-            LogInfo logInfo = logInfoFilter(DefaultLogType.MANUAL, actionLogKey, handleType, message, params);
-            if (logInfo == null) {
-                return false;
-            }
-            if (DefaultActionLogKey.DEFAULT.equals(actionLogKey)) {
-                return false;
+            if (!LOG_MANUAL.logInfoFilter(actionLogKey, handleType, message, params)) {
+                return;
             }
             LogContext.getInstance().getActionLogger(actionLogKey).debug(message, params);
-            return true;
         } catch (Throwable e) {
-            LOG.error("LogManual Exception", e);
-            return false;
+            LogContext.getInstance().getActionLogger(actionLogKey).error("debug Exception", e);
         }
     }
 
     /**
      * 打印info级别日志
+     * 只调用过滤器和获取Logger打印.因为支持SLF4J-API,逻辑太多容易死循环,保证这个过程不使用SLF4J-API
      *
      * @param actionLogKey 日志标记
      * @param handleType   操作类型
      * @param message      日志信息
      * @param params       打印参数
      */
-    public static boolean info(ActionLogKey actionLogKey, HandleType handleType, String message, Object... params) {
+    public final static void info(ActionLogKey actionLogKey, HandleType handleType, String message, Object... params) {
         try {
-            actionLogKey = ifNullOfferDefault(actionLogKey);
-            handleType = ifNullOfferDefault(handleType);
-            LogInfo logInfo = logInfoFilter(DefaultLogType.MANUAL, actionLogKey, handleType, message, params);
-            if (logInfo == null) {
-                return false;
-            }
-            if (DefaultActionLogKey.DEFAULT.equals(actionLogKey)) {
-                return false;
+            if (!LOG_MANUAL.logInfoFilter(actionLogKey, handleType, message, params)) {
+                return;
             }
             LogContext.getInstance().getActionLogger(actionLogKey).info(message, params);
-            return true;
         } catch (Throwable e) {
-            LOG.error("LogManual Exception", e);
-            return false;
+            LogContext.getInstance().getActionLogger(actionLogKey).error("info Exception", e);
         }
     }
 
     /**
      * 打印warn级别日志
+     * 只调用过滤器和获取Logger打印.因为支持SLF4J-API,逻辑太多容易死循环,保证这个过程不使用SLF4J-API
      *
      * @param actionLogKey 日志标记
      * @param handleType   操作类型
      * @param message      日志信息
      * @param params       打印参数
      */
-    public static boolean warn(ActionLogKey actionLogKey, HandleType handleType, String message, Object... params) {
+    public final static void warn(ActionLogKey actionLogKey, HandleType handleType, String message, Object... params) {
         try {
-            actionLogKey = ifNullOfferDefault(actionLogKey);
-            handleType = ifNullOfferDefault(handleType);
-            LogInfo logInfo = logInfoFilter(DefaultLogType.MANUAL, actionLogKey, handleType, message, params);
-            if (logInfo == null) {
-                return false;
-            }
-            if (DefaultActionLogKey.DEFAULT.equals(actionLogKey)) {
-                return false;
+            if (!LOG_MANUAL.logInfoFilter(actionLogKey, handleType, message, params)) {
+                return;
             }
             LogContext.getInstance().getActionLogger(actionLogKey).warn(message, params);
-            return true;
         } catch (Throwable e) {
-            LOG.error("LogManual Exception", e);
-            return false;
+            LogContext.getInstance().getActionLogger(actionLogKey).error("warn Exception", e);
         }
     }
 
     /**
      * 打印error级别日志
+     * 只调用过滤器和获取Logger打印.因为支持SLF4J-API,逻辑太多容易死循环,保证这个过程不使用SLF4J-API
      *
      * @param actionLogKey 日志标记
      * @param message      日志信息
      * @param params       打印参数
      */
-    public static boolean error(ActionLogKey actionLogKey, String message, Object... params) {
+    public final static void error(ActionLogKey actionLogKey, String message, Object... params) {
         try {
-            actionLogKey = ifNullOfferDefault(actionLogKey);
-            LogInfo logInfo = logInfoFilter(DefaultLogType.MANUAL, actionLogKey, HandleType.THROW, message, params);
-            if (logInfo == null) {
-                return false;
-            }
-            if (DefaultActionLogKey.DEFAULT.equals(actionLogKey)) {
-                return false;
+            if (!LOG_MANUAL.logInfoFilter(actionLogKey, HandleType.THROW, message, params)) {
+                return;
             }
             LogContext.getInstance().getActionLogger(actionLogKey).error(message, params);
-            return true;
         } catch (Throwable e) {
-            LOG.error("LogManual Exception", e);
-            return false;
+            LogContext.getInstance().getActionLogger(actionLogKey).error("error Exception", e);
         }
     }
 
     /**
      * LogInfo过滤器
      *
-     * @param logType      日志类型
      * @param actionLogKey 日志标记
      * @param handleType   操作类型
      * @param message      日志信息
      * @param params       打印参数
+     * @return
      */
-    protected static LogInfo logInfoFilter(LogType logType, ActionLogKey actionLogKey, HandleType handleType
+    private boolean logInfoFilter(ActionLogKey actionLogKey, HandleType handleType
             , String message, Object... params) {
-        LOG.debug("logType {}, flow {}, action {}, handleType {}, message {}, params {}"
-                , logType, actionLogKey.flow(), actionLogKey.action(), handleType, message, params);
-        checkArgument(DefaultLogType.AOP.equals(logType), "Only internal logType set DefaultLogType.AOP are allowed!");
         try {
-            LogInfo logInfo = createLogInfo(logType, actionLogKey, handleType, message, params);
-            if (!LogFilterHandler.filter(logInfo)) {
-                return null;
+            actionLogKey = ActionLogConfig.ifNullOfferDefault(actionLogKey);
+            // ActionLog自身也使用了SLF4J-API,ActionLogKey不传默认DefaultActionLogKey.DEFAULT
+            // 避免死循环,所以必须跳过,提升性能直接跳过
+            if (DefaultActionLogKey.DEFAULT.equals(actionLogKey)) {
+                return true;
             }
-            return logInfo;
+            LogContext.getInstance().getActionLogger(actionLogKey)
+                    .debug("actionLogKey {}, handleType {}, message {}, params {}"
+                            , actionLogKey, handleType, message, params);
+            handleType = ActionLogConfig.ifNullOfferDefault(handleType);
+            LogInfo logInfo = createLogInfo(actionLogKey, handleType, message, params);
+            return LogFilterHandler.filter(logInfo);
         } catch (Throwable th) {
-            LOG.error("logInfoFilter Exception", th);
-            return null;
+            LogContext.getInstance().getActionLogger(actionLogKey).error("logInfoFilter Exception", th);
+            return false;
         }
     }
 
     /**
-     * {@link sun.reflect.Reflection#getCallerClass(int)} int = 3,是当前方法被调用的深度
+     * 生成切面日志信息
      *
+     * @param actionLogKey 日志标记
+     * @param handleType   操作类型
+     * @param message      日志信息
+     * @param params       打印参数
      * @return
      */
-    private static LogInfo createLogInfo(LogType logType, ActionLogKey actionLogKey, HandleType handleType
+    private LogInfo createLogInfo(ActionLogKey actionLogKey, HandleType handleType
             , String message, Object... params) throws ClassNotFoundException {
         // 构建日志
         LogInfo logInfo = LogContext.getInstance().getLogInfo();
+        // 设置日志类型
+        logInfo.setLogType(getLogType());
+        // 设置标记信息
+        logInfo.setFlow(actionLogKey.flow()).setAction(actionLogKey.action())
+                .setHandleType(handleType).setExtendInfo(message);
+        // 填充参数 结果 异常
+        if (HandleType.RETURN.equals(logInfo.getHandleType())) {
+            logInfo.setResult(params);
+        } else {
+            logInfo.getParameters().put(logInfo.getExtendInfo(), params);
+        }
+        logInfo.setThrowable(getThrowable(params));
         // 填充切面上下文信息
         logInfo.setToken(AspectContext.getInstance().getToken());
         logInfo.setHierarchy(AspectContext.getInstance().getCurrentHierarchy());
         logInfo.setSequence(AspectContext.getInstance().getAspectSequenceAndIncrement());
-        // 设置LogType
-        logInfo.setLogType(logType);
-        // 设置actionLogKey
-        logInfo.setFlow(actionLogKey.flow()).setAction(actionLogKey.action())
-                .setHandleType(handleType).setExtendInfo(message);
-        // 调用信息填充
+        // 填充调用信息
         if (ActionLogConfig.isLogManualIncludeLocation()) {
-            StackTraceElement element = ReflectionUtils.getStackTraceElement(3);
+            StackTraceElement element = getStackTraceElement();
             logInfo.setCallerClass(ClassUtils.loadClass(element.getClassName()));
             logInfo.setCallerLineNumber(element.getLineNumber());
             logInfo.setCallerMethodName(element.getMethodName());
         }
-        // 填充切面上下文信息, 填充parameters result throwable
-        fillLogInfoContext(logInfo, handleType, message, params);
         return logInfo;
     }
 
-    private static void fillLogInfoContext(LogInfo logInfo, HandleType handleType, Object... params) {
-        // 填充parameters/result
-        if (HandleType.RETURN.equals(handleType)) {
-            logInfo.setResult(params);
-        } else {
-            logInfo.setResult(null);
-            logInfo.getParameters().put("0", params);
-        }
-        // 填充throwable
-        if (ArrayUtils.isNotEmpty(params)) {
-            Object o = params[params.length - 1];
-            if (o instanceof Throwable) {
-                logInfo.setThrowable((Throwable) o);
-            } else {
-                logInfo.setThrowable(null);
-            }
-        } else {
-            logInfo.setThrowable(null);
-        }
+    /**
+     * 获取日志类型
+     *
+     * @return
+     */
+    protected LogType getLogType() {
+        return DefaultLogType.MANUAL;
     }
 
     /**
-     * 检查actionLogKey,为空继续检查参数第一位,再取默认
+     * 获取异常信息
      *
-     * @param actionLogKey 日志标记
-     * @param params       日志参数
-     * @return
+     * @param params 打印参数
      */
-    private static ActionLogKey ifNullOfferDefault(ActionLogKey actionLogKey, Object... params) {
-        if (actionLogKey != null) {
-            return actionLogKey;
+    protected Throwable getThrowable(Object... params) {
+        if (ArrayUtils.isNotEmpty(params) && params[params.length - 1] instanceof Throwable) {
+            return (Throwable) params[params.length - 1];
         }
-        if (params != null && params.length > 1 && params[0] instanceof ActionLogKey) {
-            actionLogKey = (ActionLogKey) params[0];
-        }
-        return LogContext.getInstance().ifNullOfferDefault(actionLogKey);
+        return null;
     }
 
     /**
-     * 检查handleType,为空继续检查参数第二位,再取默认
+     * 获取调用信息
+     * {@link sun.reflect.Reflection#getCallerClass(int)} int = 4,是当前方法被调用的深度
      *
-     * @param handleType 日志类型
-     * @param params     日志参数
-     * @return
+     * @throws ClassNotFoundException
      */
-    private static HandleType ifNullOfferDefault(HandleType handleType, Object... params) {
-        if (handleType != null) {
-            return handleType;
-        }
-        if (params != null && params.length > 2 && params[0] instanceof ActionLogKey && params[1] instanceof HandleType) {
-            handleType = (HandleType) params[0];
-        }
-        return LogContext.getInstance().ifNullOfferDefault(handleType);
+    protected StackTraceElement getStackTraceElement() throws ClassNotFoundException {
+        return ReflectionUtils.getStackTraceElement(4);
     }
 
     public static void main(String[] args) {

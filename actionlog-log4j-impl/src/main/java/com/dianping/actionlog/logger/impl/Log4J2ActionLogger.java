@@ -1,7 +1,6 @@
 package com.dianping.actionlog.logger.impl;
 
 import com.dianping.actionlog.logger.ActionLogger;
-import org.slf4j.Logger;
 
 /**
  * @author liuzheng03
@@ -11,9 +10,9 @@ import org.slf4j.Logger;
  */
 public class Log4J2ActionLogger implements ActionLogger {
 
-    private Logger logger;
+    private org.apache.logging.log4j.Logger logger;
 
-    public Log4J2ActionLogger(Logger logger) {
+    public Log4J2ActionLogger(org.apache.logging.log4j.Logger logger) {
         this.logger = logger;
     }
 

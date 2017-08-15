@@ -1,7 +1,5 @@
 package com.dianping.actionlog.logger.log4j;
 
-import com.dianping.actionlog.common.LogLevel;
-
 import java.io.File;
 
 /**
@@ -45,10 +43,6 @@ public class Log4j2LoggerConfig {
      * 日志是否开启定位信息
      */
     private static String loggerIncludeLocation;
-    /**
-     * 日志打印等级
-     */
-    private static LogLevel loggerLogLevel;
 
     static {
         logConversionPattern = "%d{yyyy-MM-dd HH:mm:ss.SSS z} %-5level [%t] %msg%xEx%n";
@@ -60,7 +54,6 @@ public class Log4j2LoggerConfig {
         logAppenderImmediateFlush = "false";
         loggerAdditive = "false";
         loggerIncludeLocation = "false";
-        loggerLogLevel = LogLevel.INFO;
     }
 
     private Log4j2LoggerConfig() {
@@ -136,14 +129,6 @@ public class Log4j2LoggerConfig {
 
     public static void setLoggerIncludeLocation(String loggerIncludeLocation) {
         Log4j2LoggerConfig.loggerIncludeLocation = loggerIncludeLocation;
-    }
-
-    public static LogLevel getLoggerLogLevel() {
-        return loggerLogLevel;
-    }
-
-    public static void setLoggerLogLevel(LogLevel loggerLogLevel) {
-        Log4j2LoggerConfig.loggerLogLevel = loggerLogLevel;
     }
 
 }

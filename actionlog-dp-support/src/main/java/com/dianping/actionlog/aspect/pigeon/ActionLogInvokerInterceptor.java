@@ -1,14 +1,12 @@
 package com.dianping.actionlog.aspect.pigeon;
 
 import com.alibaba.fastjson.JSON;
-import com.dianping.actionlog.advice.LogInfo;
 import com.dianping.actionlog.advice.LogManual;
-import com.dianping.actionlog.common.DefaultLogType;
-import com.dianping.actionlog.api.ActionLogKey;
 import com.dianping.actionlog.api.HandleType;
 import com.dianping.actionlog.common.ActionLogConstants;
 import com.dianping.actionlog.common.DpSupportConfig;
 import com.dianping.actionlog.common.DpSupportConstants;
+import com.dianping.actionlog.common.LogType;
 import com.dianping.actionlog.common.PigeonActionLogKey;
 import com.dianping.actionlog.common.PigeonLogType;
 import com.dianping.actionlog.context.LogContext;
@@ -44,21 +42,21 @@ public class ActionLogInvokerInterceptor implements InvokerInterceptor {
         ContextUtils.putGlobalContext(ActionLogConstants.LOG_REQUEST_IP, actionLogRequestIp);
 
         if (DpSupportConfig.needPigeonLog()) {
-            PigeonClientLogManual.info(HandleType.PARAM, getExtendInfo(), invokerContext);
+            PigeonClientLogManual.info(PigeonActionLogKey.PIGEON_CLIENT, HandleType.PARAM, getExtendInfo(), invokerContext);
         }
     }
 
     @Override
     public void postInvoke(InvokerContext invokerContext) {
         if (DpSupportConfig.needPigeonLog()) {
-            PigeonClientLogManual.info(HandleType.RETURN, getExtendInfo(), invokerContext);
+            PigeonClientLogManual.info(PigeonActionLogKey.PIGEON_CLIENT, HandleType.RETURN, getExtendInfo(), invokerContext);
         }
     }
 
     @Override
     public void afterThrowing(InvokerContext invokerContext, Throwable throwable) {
         if (DpSupportConfig.needPigeonLog()) {
-            PigeonClientLogManual.error(getExtendInfo(), invokerContext, throwable);
+            PigeonClientLogManual.error(PigeonActionLogKey.PIGEON_CLIENT, getExtendInfo(), invokerContext, throwable);
         }
     }
 
@@ -75,44 +73,8 @@ public class ActionLogInvokerInterceptor implements InvokerInterceptor {
 
     private static class PigeonClientLogManual extends LogManual {
 
-        /**
-         * 打印info级别日志
-         *
-         * @param handleType 操作类型
-         * @param message    日志信息
-         * @param params     打印参数
-         */
-        public static void info(HandleType handleType, String message, Object... params) {
-            try {
-                ActionLogKey actionLogKey = PigeonActionLogKey.PIGEON_CLIENT;
-                handleType = LogContext.getInstance().ifNullOfferDefault(handleType);
-                LogInfo logInfo = logInfoFilter(PigeonLogType.PIGEON_CLIENT, actionLogKey, handleType, message, params);
-                if (logInfo == null) {
-                    return;
-                }
-                LogContext.getInstance().getActionLogger(actionLogKey).info(message, params);
-            } catch (Exception e) {
-                LOG.error("PigeonClientLogManual Exception", e);
-            }
-        }
-
-        /**
-         * 打印error级别日志
-         *
-         * @param message 日志信息
-         * @param params  打印参数
-         */
-        public static void error(String message, Object... params) {
-            try {
-                ActionLogKey actionLogKey = PigeonActionLogKey.PIGEON_CLIENT;
-                LogInfo logInfo = logInfoFilter(PigeonLogType.PIGEON_CLIENT, actionLogKey, HandleType.THROW, message, params);
-                if (logInfo == null) {
-                    return;
-                }
-                LogContext.getInstance().getActionLogger(actionLogKey).error(message, params);
-            } catch (Exception e) {
-                LOG.error("PigeonClientLogManual Exception", e);
-            }
+        protected LogType getLogType() {
+            return PigeonLogType.PIGEON_CLIENT;
         }
 
     }

@@ -1,6 +1,9 @@
 package com.dianping.actionlog.logger;
 
 /**
+ * 由于ActionLog支持了SLF4J API, ActionLogger内部实现千万不要以org.slf4j.Logger实现
+ * ,请使用实现框架自己的Logger,例如:org.apache.logging.log4j.Logger
+ * <p/>
  * Created by jourrey on 16/11/16.
  */
 public interface ActionLogger {
@@ -36,5 +39,5 @@ public interface ActionLogger {
      * @param params  parameters to the message.
      */
     void error(String message, Object... params);
-    
+
 }

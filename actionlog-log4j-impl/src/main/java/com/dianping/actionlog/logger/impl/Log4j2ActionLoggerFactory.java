@@ -3,45 +3,25 @@ package com.dianping.actionlog.logger.impl;
 import com.dianping.actionlog.api.ActionLogKey;
 import com.dianping.actionlog.context.DefaultActionLogKey;
 import com.dianping.actionlog.logger.ActionLogger;
-import com.dianping.actionlog.logger.ActionLoggerFactory;
+import com.dianping.actionlog.logger.CacheActionLoggerFactory;
 import com.dianping.actionlog.logger.log4j.Log4j2LoggerFactory;
-
-import java.util.concurrent.ConcurrentHashMap;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Created by jourrey on 16/11/21.
  */
-public class Log4j2ActionLoggerFactory implements ActionLoggerFactory {
-    private static final String KEY_LINK_SYMBOL = "$ALK#";
-    private final ConcurrentHashMap<String, ActionLogger> actionLoggerResolverCache = new ConcurrentHashMap<String, ActionLogger>();
+public class Log4j2ActionLoggerFactory extends CacheActionLoggerFactory {
+    private static final Logger LOG = LogManager.getLogger(Log4j2ActionLoggerFactory.class);
 
     @Override
-    public ActionLogger getLogger(ActionLogKey actionLogKey) {
-        String cacheActionLogKey = getActionLogKey(actionLogKey);
-        if (actionLoggerResolverCache.containsKey(cacheActionLogKey)) {
-            return actionLoggerResolverCache.get(cacheActionLogKey);
+    public ActionLogger getLogger(String loggerName, ActionLogKey actionLogKey) {
+        try {
+            return new Log4J2ActionLogger(new Log4j2LoggerFactory(loggerName, actionLogKey).createLogger());
+        } catch (Exception e) {
+            LOG.error("getLogger Exception", e);
         }
-
-        ActionLogger actionLogger = new Log4J2ActionLogger(Log4j2LoggerFactory.create(actionLogKey).createLogger());
-        ActionLogger cacheActionLogger = actionLoggerResolverCache.putIfAbsent(cacheActionLogKey, actionLogger);
-        if (cacheActionLogger != null) {
-            actionLogger = cacheActionLogger;
-        }
-        return actionLogger;
-    }
-
-    /**
-     * 这里loggerName直接使用"+"拼接字符串,是因为flow和action相对稳定,运行一次后会加入常量池,提升性能
-     * 实际测试"+"QPS达到40W,MessageFormat.format在11W,String.format只有3-4W
-     *
-     * @param actionLogKey
-     * @return
-     */
-    private String getActionLogKey(ActionLogKey actionLogKey) {
-        if (actionLogKey == null) {
-            return null;
-        }
-        return actionLogKey.flow() + KEY_LINK_SYMBOL + actionLogKey.action();
+        return null;
     }
 
     public static void main(String[] args) {
@@ -56,4 +36,5 @@ public class Log4j2ActionLoggerFactory implements ActionLoggerFactory {
             }
         }
     }
+
 }

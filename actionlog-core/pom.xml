@@ -23,6 +23,12 @@
         <dependency>
             <groupId>com.dianping.shadow</groupId>
             <artifactId>shadow-core</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <!-- Log begin -->
         <dependency>

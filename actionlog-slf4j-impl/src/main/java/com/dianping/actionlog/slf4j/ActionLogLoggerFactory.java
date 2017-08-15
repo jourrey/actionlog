@@ -14,27 +14,19 @@
  * See the license for the specific language governing permissions and
  * limitations under the license.
  */
-package org.apache.logging.slf4j;
+package com.dianping.actionlog.slf4j;
+
+import org.slf4j.ILoggerFactory;
+import org.slf4j.Logger;
 
 /**
- * Exception thrown when the SLF4J adapter encounters a problem.
+ * Log4j implementation of SLF4J ILoggerFactory interface.
  */
-public class SLF4JLoggingException extends RuntimeException {
+public class ActionLogLoggerFactory implements ILoggerFactory {
 
-    /**
-     * Generated serial version ID.
-     */
-    private static final long serialVersionUID = -1618650972455089998L;
-
-    public SLF4JLoggingException(final String msg) {
-        super(msg);
+    @Override
+    public Logger getLogger(String name) {
+        return new ActionLogLogger(name);
     }
 
-    public SLF4JLoggingException(final String msg, final Exception ex) {
-        super(msg, ex);
-    }
-
-    public SLF4JLoggingException(final Exception ex) {
-        super(ex);
-    }
 }

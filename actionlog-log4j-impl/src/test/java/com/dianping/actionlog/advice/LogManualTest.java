@@ -10,7 +10,7 @@ import org.apache.logging.log4j.Logger;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.slf4j.LoggerFactory;
+//import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -35,7 +35,7 @@ public class LogManualTest {
 
     @Test
     public void testPressure() throws InterruptedException {
-        final org.slf4j.Logger logger = LoggerFactory.getLogger(LogManualTest.class);
+//        final org.slf4j.Logger logger = LoggerFactory.getLogger(LogManualTest.class);
         final Logger logger2 = LogManager.getLogger(LogManualTest.class);
         final ActionLogger actionLogger = new Log4j2ActionLoggerFactory().getLogger(DefaultActionLogKey.DEFAULT);
 
@@ -43,7 +43,7 @@ public class LogManualTest {
             @Override
             public void run() {
 //                logger.info("log4j2之所以快过其它日志组件，是因为它支持异步输出日志，虽然这里没有使用异步,正在测试参数赋值" + "123" + "456");
-                logger.error("log4j2之所以快过其它日志组件，是因为它支持异步输出日志，虽然这里没有使用异步,正在测试参数赋值" + "123" + "456");
+//                logger.error("log4j2之所以快过其它日志组件，是因为它支持异步输出日志，虽然这里没有使用异步,正在测试参数赋值" + "123" + "456");
             }
         };
         Runnable log4j2 = new Runnable() {

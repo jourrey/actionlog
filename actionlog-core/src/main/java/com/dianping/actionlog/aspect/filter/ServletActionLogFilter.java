@@ -1,13 +1,12 @@
 package com.dianping.actionlog.aspect.filter;
 
 import com.alibaba.fastjson.JSON;
-import com.dianping.actionlog.advice.LogInfo;
 import com.dianping.actionlog.advice.LogManual;
-import com.dianping.actionlog.api.ActionLogKey;
 import com.dianping.actionlog.api.HandleType;
 import com.dianping.actionlog.common.ActionLogConfig;
 import com.dianping.actionlog.common.ActionLogConstants;
 import com.dianping.actionlog.common.DefaultLogType;
+import com.dianping.actionlog.common.LogType;
 import com.dianping.actionlog.context.DefaultActionLogKey;
 import com.dianping.actionlog.context.LogContext;
 import com.google.common.collect.Maps;
@@ -54,7 +53,7 @@ public class ServletActionLogFilter implements Filter {
             LogContext.getInstance().putLocalContext(ActionLogConstants.LOG_REQUEST_IP, requestIp);
 
             if (ActionLogConfig.isNeedFilterLog()) {
-                FilterLogManual.info(HandleType.PARAM, getExtendInfo(), request.getParameterMap());
+                FilterLogManual.info(DefaultActionLogKey.FILTER, HandleType.PARAM, getExtendInfo(), request.getParameterMap());
             }
         } catch (Throwable th) {
             LOG.error("ServletActionLogFilter doFilter Exception", th);
@@ -64,9 +63,9 @@ public class ServletActionLogFilter implements Filter {
             try {
                 if (ActionLogConfig.isNeedFilterLog()) {
                     if (response.getContentType().indexOf(JSON_CONTENT_TYPE) > -1) {
-                        FilterLogManual.info(HandleType.RETURN, getExtendInfo(), ((HttpServletResponse) response).getStatus());
+                        FilterLogManual.info(DefaultActionLogKey.FILTER, HandleType.RETURN, getExtendInfo(), ((HttpServletResponse) response).getStatus());
                     } else {
-                        FilterLogManual.info(HandleType.RETURN, getExtendInfo());
+                        FilterLogManual.info(DefaultActionLogKey.FILTER, HandleType.RETURN, getExtendInfo());
                     }
                 }
             } catch (Throwable th) {
@@ -74,12 +73,12 @@ public class ServletActionLogFilter implements Filter {
             }
         } catch (Throwable th) {
             if (ActionLogConfig.isNeedFilterLog()) {
-                FilterLogManual.error(getExtendInfo(), th);
+                FilterLogManual.error(DefaultActionLogKey.FILTER, getExtendInfo(), th);
             }
             throw new ServletException(th);
         } finally {
             if (ActionLogConfig.isNeedFilterLog()) {
-                FilterLogManual.info(HandleType.FINALLY, getExtendInfo());
+                FilterLogManual.info(DefaultActionLogKey.FILTER, HandleType.FINALLY, getExtendInfo());
             }
             LogContext.getInstance().clearLocalContext();
         }
@@ -120,44 +119,8 @@ public class ServletActionLogFilter implements Filter {
 
     private static class FilterLogManual extends LogManual {
 
-        /**
-         * 打印info级别日志
-         *
-         * @param handleType 操作类型
-         * @param message    日志信息
-         * @param params     打印参数
-         */
-        public static void info(HandleType handleType, String message, Object... params) {
-            try {
-                ActionLogKey actionLogKey = DefaultActionLogKey.FILTER;
-                handleType = LogContext.getInstance().ifNullOfferDefault(handleType);
-                LogInfo logInfo = logInfoFilter(DefaultLogType.FILTER, actionLogKey, handleType, message, params);
-                if (logInfo == null) {
-                    return;
-                }
-                LogContext.getInstance().getActionLogger(actionLogKey).info(message, params);
-            } catch (Exception e) {
-                LOG.error("FilterLogManual Exception", e);
-            }
-        }
-
-        /**
-         * 打印error级别日志
-         *
-         * @param message 日志信息
-         * @param params  打印参数
-         */
-        public static void error(String message, Object... params) {
-            try {
-                ActionLogKey actionLogKey = DefaultActionLogKey.FILTER;
-                LogInfo logInfo = logInfoFilter(DefaultLogType.FILTER, actionLogKey, HandleType.THROW, message, params);
-                if (logInfo == null) {
-                    return;
-                }
-                LogContext.getInstance().getActionLogger(actionLogKey).error(message, params);
-            } catch (Exception e) {
-                LOG.error("FilterLogManual Exception", e);
-            }
+        protected LogType getLogType() {
+            return DefaultLogType.FILTER;
         }
 
     }

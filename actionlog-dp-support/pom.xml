@@ -36,9 +36,9 @@
             <groupId>com.dianping.lion</groupId>
             <artifactId>lion-client</artifactId>
         </dependency>
-        <dependency>
-            <groupId>com.meituan.inf</groupId>
-            <artifactId>xmd-log4j2</artifactId>
-        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>com.meituan.inf</groupId>-->
+            <!--<artifactId>xmd-log4j2</artifactId>-->
+        <!--</dependency>-->
     </dependencies>
 </project>

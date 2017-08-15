@@ -14,19 +14,19 @@
     <modules>
         <module>actionlog-api</module>
         <module>actionlog-core</module>
+        <module>actionlog-slf4j-impl</module>
         <module>actionlog-log4j-impl</module>
-        <module>actionlog-log4j-slf4j-impl</module>
-        <module>actionlog-dp-support</module>
         <module>actionlog-log4j-impl-lion</module>
+        <module>actionlog-dp-support</module>
     </modules>
 
     <properties>
         <project-api-version>1.1.0-SNAPSHOT</project-api-version>
         <project-core-version>1.1.0-SNAPSHOT</project-core-version>
+        <project-slf4j-impl-version>1.1.0-SNAPSHOT</project-slf4j-impl-version>
         <project-log4j-impl-version>1.1.0-SNAPSHOT</project-log4j-impl-version>
-        <project-log4j-slf4j-impl-version>1.1.0-SNAPSHOT</project-log4j-slf4j-impl-version>
-        <project-dp-support-version>1.1.0-SNAPSHOT</project-dp-support-version>
         <project-log4j-impl-lion-version>1.1.0-SNAPSHOT</project-log4j-impl-lion-version>
+        <project-dp-support-version>1.1.0-SNAPSHOT</project-dp-support-version>
         <slf4j-version>1.7.21</slf4j-version>
         <!-- log4j2,请勿随意修改版本号\增加包,可能与dianping基础架构框架不兼容 -->
         <log4j2-version>2.3</log4j2-version>
